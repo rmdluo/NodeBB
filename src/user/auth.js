@@ -87,7 +87,7 @@ module.exports = function (User) {
             const token = _token || utils_1.default.generateUUID();
             if (!_token) {
                 // The next lines call a function in a module that has not been updated to TS yet
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 yield User.setUserField(uid, 'rss_token', token);
             }
             return token;
@@ -97,6 +97,8 @@ module.exports = function (User) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.clearLoginAttempts = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             yield database_1.default.delete(`loginAttempts:${uid}`);
         });
     };
