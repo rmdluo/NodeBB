@@ -1,5 +1,3 @@
-'use strict';
-
 import winston from 'winston';
 import validator from 'validator';
 import util from 'util';
@@ -93,7 +91,7 @@ export = function (User) {
         const expiredSids = [];
         await Promise.all(Object.keys(uuidMapping).map(async (uuid) => {
             const sid = uuidMapping[uuid];
-            const sessionObj = await getSessionFromStore(sid);
+            const sessionObj : any = await getSessionFromStore(sid);
             const expired = !sessionObj || !sessionObj.hasOwnProperty('passport') ||
                 !sessionObj.passport.hasOwnProperty('user') ||
                 parseInt(sessionObj.passport.user, 10) !== parseInt(uid, 10);
@@ -125,7 +123,7 @@ export = function (User) {
 
     User.auth.revokeSession = async function (sessionId, uid) {
         winston.verbose(`[user.auth] Revoking session ${sessionId} for user ${uid}`);
-        const sessionObj = await getSessionFromStore(sessionId);
+        const sessionObj : any = await getSessionFromStore(sessionId);
         if (sessionObj && sessionObj.meta && sessionObj.meta.uuid) {
             await db.deleteObjectField(`uid:${uid}:sessionUUID:sessionId`, sessionObj.meta.uuid);
         }
