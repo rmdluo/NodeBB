@@ -198,11 +198,18 @@ module.exports = function (User) {
     User.auth.revokeAllSessions = function (uids, except) {
         return __awaiter(this, void 0, void 0, function* () {
             uids = Array.isArray(uids) ? uids : [uids];
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const sids = yield database_1.default.getSortedSetsMembers(uids.map(uid => `uid:${uid}:sessions`));
             const promises = [];
             uids.forEach((uid, index) => {
                 const ids = sids[index].filter(id => id !== except);
                 if (ids.length) {
+                    // The next line calls a function in a module that has not been updated to TS yet
+                    /* eslint-disable-next-line
+                        @typescript-eslint/no-unsafe-member-access,
+                        @typescript-eslint/no-unsafe-call
+                    */
                     promises.push(ids.map(s => User.auth.revokeSession(s, uid)));
                 }
             });

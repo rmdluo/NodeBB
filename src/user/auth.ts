@@ -186,14 +186,21 @@ export = function (User) {
 
     // The next line calls a function in a module that has not been updated to TS yet
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    User.auth.revokeAllSessions = async function (uids, except) {
+    User.auth.revokeAllSessions = async function (uids : string | Array<string>, except) {
         uids = Array.isArray(uids) ? uids : [uids];
-        const sids = await db.getSortedSetsMembers(uids.map(uid => `uid:${uid}:sessions`));
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const sids : Array<Array<string>> = await db.getSortedSetsMembers(uids.map(uid => `uid:${uid}:sessions`)) as Array<Array<string>>;
         const promises = [];
         uids.forEach((uid, index) => {
             const ids = sids[index].filter(id => id !== except);
             if (ids.length) {
-                promises.push(ids.map(s => User.auth.revokeSession(s, uid)));
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call
+                */
+                promises.push(ids.map(s => User.auth.revokeSession(s, uid) as Promise<void>));
             }
         });
         await Promise.all(promises);
