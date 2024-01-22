@@ -172,13 +172,21 @@ export = function (User) {
 
     // The next line calls a function in a module that has not been updated to TS yet
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    User.auth.revokeSession = async function (sessionId, uid) {
+    User.auth.revokeSession = async function (sessionId : string, uid : string) {
         winston.verbose(`[user.auth] Revoking session ${sessionId} for user ${uid}`);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sessionObj : any = await getSessionFromStore(sessionId);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (sessionObj && sessionObj.meta && sessionObj.meta.uuid) {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             await db.deleteObjectField(`uid:${uid}:sessionUUID:sessionId`, sessionObj.meta.uuid);
         }
         await Promise.all([
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             db.sortedSetRemove(`uid:${uid}:sessions`, sessionId),
             sessionStoreDestroy(sessionId),
         ]);

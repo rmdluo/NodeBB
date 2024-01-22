@@ -183,11 +183,19 @@ module.exports = function (User) {
     User.auth.revokeSession = function (sessionId, uid) {
         return __awaiter(this, void 0, void 0, function* () {
             winston_1.default.verbose(`[user.auth] Revoking session ${sessionId} for user ${uid}`);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const sessionObj = yield getSessionFromStore(sessionId);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (sessionObj && sessionObj.meta && sessionObj.meta.uuid) {
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 yield database_1.default.deleteObjectField(`uid:${uid}:sessionUUID:sessionId`, sessionObj.meta.uuid);
             }
             yield Promise.all([
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 database_1.default.sortedSetRemove(`uid:${uid}:sessions`, sessionId),
                 sessionStoreDestroy(sessionId),
             ]);
