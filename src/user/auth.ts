@@ -1,16 +1,16 @@
 'use strict';
 
-const winston = require('winston');
-const validator = require('validator');
-const util = require('util');
-const _ = require('lodash');
-const db = require('../database');
-const meta = require('../meta');
-const events = require('../events');
-const batch = require('../batch');
-const utils = require('../utils');
+import winston from 'winston';
+import validator from 'validator';
+import util from 'util';
+import _ from 'lodash';
+import db from '../database';
+import meta from '../meta';
+import events from '../events';
+import batch from '../batch';
+import utils from '../utils';
 
-module.exports = function (User) {
+export = function (User) {
     User.auth = {};
 
     User.auth.logAttempt = async function (uid, ip) {
