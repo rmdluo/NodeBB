@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -20,9 +20,10 @@ const meta_1 = __importDefault(require("../meta"));
 const events_1 = __importDefault(require("../events"));
 const batch_1 = __importDefault(require("../batch"));
 const utils_1 = __importDefault(require("../utils"));
-module.exports = function (User) {
-    User.auth = {};
-    User.auth.logAttempt = function (uid, ip) {
+const _1 = __importDefault(require("."));
+module.exports = function () {
+    _1.default.auth = {};
+    _1.default.auth.logAttempt = function (uid, ip) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
@@ -48,7 +49,7 @@ module.exports = function (User) {
             throw new Error('[[error:account-locked]]');
         });
     };
-    User.auth.getFeedToken = function (uid) {
+    _1.default.auth.getFeedToken = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
@@ -56,17 +57,17 @@ module.exports = function (User) {
             const _token = yield database_1.default.getObjectField(`user:${uid}`, 'rss_token');
             const token = _token || utils_1.default.generateUUID();
             if (!_token) {
-                yield User.setUserField(uid, 'rss_token', token);
+                yield _1.default.setUserField(uid, 'rss_token', token);
             }
             return token;
         });
     };
-    User.auth.clearLoginAttempts = function (uid) {
+    _1.default.auth.clearLoginAttempts = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
             yield database_1.default.delete(`loginAttempts:${uid}`);
         });
     };
-    User.auth.resetLockout = function (uid) {
+    _1.default.auth.resetLockout = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
             yield database_1.default.deleteAll([
                 `loginAttempts:${uid}`,
@@ -76,7 +77,7 @@ module.exports = function (User) {
     };
     const getSessionFromStore = util_1.default.promisify((sid, callback) => database_1.default.sessionStore.get(sid, (err, sessObj) => callback(err, sessObj || null)));
     const sessionStoreDestroy = util_1.default.promisify((sid, callback) => database_1.default.sessionStore.destroy(sid, err => callback(err)));
-    User.auth.getSessions = function (uid, curSessionId) {
+    _1.default.auth.getSessions = function (uid, curSessionId) {
         return __awaiter(this, void 0, void 0, function* () {
             yield cleanExpiredSessions(uid);
             const sids = yield database_1.default.getSortedSetRevRange(`uid:${uid}:sessions`, 0, 19);
@@ -115,7 +116,7 @@ module.exports = function (User) {
             yield database_1.default.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
         });
     }
-    User.auth.addSession = function (uid, sessionId) {
+    _1.default.auth.addSession = function (uid, sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
@@ -130,11 +131,11 @@ module.exports = function (User) {
             const activeSessions = yield database_1.default.getSortedSetRange(`uid:${uid}:sessions`, 0, -1);
             if (activeSessions.length > maxUserSessions) {
                 const sessionsToRevoke = activeSessions.slice(0, activeSessions.length - maxUserSessions);
-                yield Promise.all(sessionsToRevoke.map(sessionId => User.auth.revokeSession(sessionId, uid)));
+                yield Promise.all(sessionsToRevoke.map(sessionId => _1.default.auth.revokeSession(sessionId, uid)));
             }
         });
     }
-    User.auth.revokeSession = function (sessionId, uid) {
+    _1.default.auth.revokeSession = function (sessionId, uid) {
         return __awaiter(this, void 0, void 0, function* () {
             winston_1.default.verbose(`[user.auth] Revoking session ${sessionId} for user ${uid}`);
             const sessionObj = yield getSessionFromStore(sessionId);
@@ -147,7 +148,7 @@ module.exports = function (User) {
             ]);
         });
     };
-    User.auth.revokeAllSessions = function (uids, except) {
+    _1.default.auth.revokeAllSessions = function (uids, except) {
         return __awaiter(this, void 0, void 0, function* () {
             uids = Array.isArray(uids) ? uids : [uids];
             const sids = yield database_1.default.getSortedSetsMembers(uids.map(uid => `uid:${uid}:sessions`));
@@ -155,13 +156,13 @@ module.exports = function (User) {
             uids.forEach((uid, index) => {
                 const ids = sids[index].filter(id => id !== except);
                 if (ids.length) {
-                    promises.push(ids.map(s => User.auth.revokeSession(s, uid)));
+                    promises.push(ids.map(s => _1.default.auth.revokeSession(s, uid)));
                 }
             });
             yield Promise.all(promises);
         });
     };
-    User.auth.deleteAllSessions = function () {
+    _1.default.auth.deleteAllSessions = function () {
         return __awaiter(this, void 0, void 0, function* () {
             yield batch_1.default.processSortedSet('users:joindate', (uids) => __awaiter(this, void 0, void 0, function* () {
                 const sessionKeys = uids.map(uid => `uid:${uid}:sessions`);

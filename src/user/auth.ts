@@ -7,8 +7,9 @@ import meta from '../meta';
 import events from '../events';
 import batch from '../batch';
 import utils from '../utils';
+import User from '.';
 
-export = function (User) {
+export = function () {
     User.auth = {};
 
     User.auth.logAttempt = async function (uid, ip) {
