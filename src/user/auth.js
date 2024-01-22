@@ -106,6 +106,8 @@ module.exports = function (User) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.resetLockout = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             yield database_1.default.deleteAll([
                 `loginAttempts:${uid}`,
                 `lockout:${uid}`,
@@ -211,11 +213,20 @@ module.exports = function (User) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.deleteAllSessions = function () {
         return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             yield batch_1.default.processSortedSet('users:joindate', (uids) => __awaiter(this, void 0, void 0, function* () {
                 const sessionKeys = uids.map(uid => `uid:${uid}:sessions`);
                 const sessionUUIDKeys = uids.map(uid => `uid:${uid}:sessionUUID:sessionId`);
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 const sids = lodash_1.default.flatten(yield database_1.default.getSortedSetRange(sessionKeys, 0, -1));
                 yield Promise.all([
+                    // The next line calls a function in a module that has not been updated to TS yet
+                    /* eslint-disable-next-line
+                        @typescript-eslint/no-unsafe-member-access,
+                        @typescript-eslint/no-unsafe-call
+                    */
                     database_1.default.deleteAll(sessionKeys.concat(sessionUUIDKeys)),
                     ...sids.map(sid => sessionStoreDestroy(sid)),
                 ]);

@@ -202,12 +202,21 @@ export = function (User) {
     // The next line calls a function in a module that has not been updated to TS yet
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.deleteAllSessions = async function () {
-        await batch.processSortedSet('users:joindate', async (uids) => {
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        await batch.processSortedSet('users:joindate', async (uids : Array<string>) => {
             const sessionKeys = uids.map(uid => `uid:${uid}:sessions`);
             const sessionUUIDKeys = uids.map(uid => `uid:${uid}:sessionUUID:sessionId`);
-            const sids = _.flatten(await db.getSortedSetRange(sessionKeys, 0, -1));
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const sids = _.flatten(await db.getSortedSetRange(sessionKeys, 0, -1) as Array<string>);
 
             await Promise.all([
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call
+                */
                 db.deleteAll(sessionKeys.concat(sessionUUIDKeys)),
                 ...sids.map(sid => sessionStoreDestroy(sid)),
             ]);
