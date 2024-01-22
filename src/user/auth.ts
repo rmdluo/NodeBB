@@ -162,11 +162,27 @@ export = function (User) {
         await revokeSessionsAboveThreshold(uid, meta.config.maxUserSessions);
     };
 
-    async function revokeSessionsAboveThreshold(uid, maxUserSessions) {
-        const activeSessions = await db.getSortedSetRange(`uid:${uid}:sessions`, 0, -1);
+    async function revokeSessionsAboveThreshold(uid : string, maxUserSessions : number) {
+        // The next line calls a function in a module that has not been updated to TS yet
+        /* eslint-disable-next-line
+            @typescript-eslint/no-unsafe-member-access,
+            @typescript-eslint/no-unsafe-call
+        */
+        const activeSessions : Array<string> = await db.getSortedSetRange(`uid:${uid}:sessions`, 0, -1) as Array<string>;
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (activeSessions.length > maxUserSessions) {
-            const sessionsToRevoke = activeSessions.slice(0, activeSessions.length - maxUserSessions);
-            await Promise.all(sessionsToRevoke.map(sessionId => User.auth.revokeSession(sessionId, uid)));
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const sessionsToRevoke : Array<string> = activeSessions.slice(0, activeSessions.length - maxUserSessions);
+            await Promise.all(sessionsToRevoke.map(
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call
+                */
+                sessionId => User.auth.revokeSession(sessionId, uid) as Promise<void>
+            ));
         }
     }
 

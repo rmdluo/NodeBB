@@ -171,10 +171,25 @@ module.exports = function (User) {
     };
     function revokeSessionsAboveThreshold(uid, maxUserSessions) {
         return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            /* eslint-disable-next-line
+                @typescript-eslint/no-unsafe-member-access,
+                @typescript-eslint/no-unsafe-call
+            */
             const activeSessions = yield database_1.default.getSortedSetRange(`uid:${uid}:sessions`, 0, -1);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (activeSessions.length > maxUserSessions) {
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 const sessionsToRevoke = activeSessions.slice(0, activeSessions.length - maxUserSessions);
-                yield Promise.all(sessionsToRevoke.map(sessionId => User.auth.revokeSession(sessionId, uid)));
+                yield Promise.all(sessionsToRevoke.map(
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call
+                */
+                sessionId => User.auth.revokeSession(sessionId, uid)));
             }
         });
     }
