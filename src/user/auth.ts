@@ -106,28 +106,23 @@ export = function (User) {
     };
 
     const getSessionFromStore = util.promisify(
+        // The next line calls a function in a module that has not been updated to TS yet
+        /* eslint-disable-next-line
+            @typescript-eslint/no-unsafe-member-access,
+            @typescript-eslint/no-unsafe-call,
+            @typescript-eslint/no-unsafe-return
+        */
         (sid, callback) => db.sessionStore.get(sid, (err, sessObj) => callback(err, sessObj || null))
     );
     const sessionStoreDestroy = util.promisify(
+        // The next line calls a function in a module that has not been updated to TS yet
+        /* eslint-disable-next-line
+            @typescript-eslint/no-unsafe-member-access,
+            @typescript-eslint/no-unsafe-call,
+            @typescript-eslint/no-unsafe-return
+        */
         (sid, callback) => db.sessionStore.destroy(sid, err => callback(err))
     );
-
-    // The next line calls a function in a module that has not been updated to TS yet
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    User.auth.getSessions = async function (uid, curSessionId) {
-        await cleanExpiredSessions(uid);
-        const sids = await db.getSortedSetRevRange(`uid:${uid}:sessions`, 0, 19);
-        let sessions = await Promise.all(sids.map(sid => getSessionFromStore(sid)));
-        sessions = sessions.map((sessObj, idx) => {
-            if (sessObj && sessObj.meta) {
-                sessObj.meta.current = curSessionId === sids[idx];
-                sessObj.meta.datetimeISO = new Date(sessObj.meta.datetime).toISOString();
-                sessObj.meta.ip = validator.escape(String(sessObj.meta.ip));
-            }
-            return sessObj && sessObj.meta;
-        }).filter(Boolean);
-        return sessions;
-    };
 
     async function cleanExpiredSessions(uid : string) {
         // The next line calls a function in a module that has not been updated to TS yet
@@ -146,17 +141,17 @@ export = function (User) {
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const expired = !sessionObj || !sessionObj.hasOwnProperty('passport') ||
-                // The next line calls a function in a module that has not been updated to TS yet
-                /* eslint-disable-next-line
-                    @typescript-eslint/no-unsafe-member-access,
-                    @typescript-eslint/no-unsafe-call
-                */
+            // The next line calls a function in a module that has not been updated to TS yet
+            /* eslint-disable-next-line
+                @typescript-eslint/no-unsafe-member-access,
+                @typescript-eslint/no-unsafe-call
+            */
                 !sessionObj.passport.hasOwnProperty('user') ||
-                // The next line calls a function in a module that has not been updated to TS yet
-                /* eslint-disable-next-line
-                    @typescript-eslint/no-unsafe-member-access,
-                    @typescript-eslint/no-unsafe-call
-                */
+            // The next line calls a function in a module that has not been updated to TS yet
+            /* eslint-disable-next-line
+                @typescript-eslint/no-unsafe-member-access,
+                @typescript-eslint/no-unsafe-call
+            */
                 parseInt(sessionObj.passport.user as string, 10) !== parseInt(uid, 10);
             if (expired) {
                 expiredUUIDs.push(uuid);
@@ -170,6 +165,41 @@ export = function (User) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
     }
+
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.getSessions = async function (uid : string, curSessionId : string) {
+        await cleanExpiredSessions(uid);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const sids : Array<string> = await db.getSortedSetRevRange(`uid:${uid}:sessions`, 0, 19) as Array<string>;
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let sessions : Array<any> = await Promise.all(sids.map(sid => getSessionFromStore(sid))) as Array<any>;
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sessions = sessions.map((sessObj : any, idx : number) => {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (sessObj && sessObj.meta) {
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                sessObj.meta.current = curSessionId === sids[idx];
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                sessObj.meta.datetimeISO = new Date(sessObj.meta.datetime as string | number | Date).toISOString();
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                sessObj.meta.ip = validator.escape(String(sessObj.meta.ip));
+            }
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
+            return sessObj && sessObj.meta;
+        }).filter(Boolean);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return sessions;
+    };
 
     async function revokeSessionsAboveThreshold(uid : string, maxUserSessions : number) {
         // The next line calls a function in a module that has not been updated to TS yet
