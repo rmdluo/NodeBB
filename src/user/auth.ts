@@ -129,25 +129,45 @@ export = function (User) {
         return sessions;
     };
 
-    async function cleanExpiredSessions(uid) {
-        const uuidMapping = await db.getObject(`uid:${uid}:sessionUUID:sessionId`);
+    async function cleanExpiredSessions(uid : string) {
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const uuidMapping : Map<number, string> = await db.getObject(`uid:${uid}:sessionUUID:sessionId`) as Map<number, string>;
         if (!uuidMapping) {
             return;
         }
         const expiredUUIDs = [];
         const expiredSids = [];
         await Promise.all(Object.keys(uuidMapping).map(async (uuid) => {
-            const sid = uuidMapping[uuid];
+            const sid : string = uuidMapping[uuid] as string;
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const sessionObj : any = await getSessionFromStore(sid);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const expired = !sessionObj || !sessionObj.hasOwnProperty('passport') ||
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call
+                */
                 !sessionObj.passport.hasOwnProperty('user') ||
-                parseInt(sessionObj.passport.user, 10) !== parseInt(uid, 10);
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call
+                */
+                parseInt(sessionObj.passport.user as string, 10) !== parseInt(uid, 10);
             if (expired) {
                 expiredUUIDs.push(uuid);
                 expiredSids.push(sid);
             }
         }));
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.deleteObjectFields(`uid:${uid}:sessionUUID:sessionId`, expiredUUIDs);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
     }
 
