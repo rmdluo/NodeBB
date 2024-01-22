@@ -62,12 +62,17 @@ export = function () {
         throw new Error('[[error:account-locked]]');
     };
 
-    User.auth.getFeedToken = async function (uid) {
+    User.auth.getFeedToken = async function (uid : string) {
         if (!(parseInt(uid, 10) > 0)) {
             return;
         }
-        const _token = await db.getObjectField(`user:${uid}`, 'rss_token');
-        const token = _token || utils.generateUUID();
+
+        // The next lines call a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const _token : string = await db.getObjectField(`user:${uid}`, 'rss_token') as string;
+        // The next lines call a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        const token : string = _token || (utils.generateUUID() as string);
         if (!_token) {
             await User.setUserField(uid, 'rss_token', token);
         }

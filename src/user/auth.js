@@ -74,7 +74,11 @@ module.exports = function () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
             }
+            // The next lines call a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const _token = yield database_1.default.getObjectField(`user:${uid}`, 'rss_token');
+            // The next lines call a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             const token = _token || utils_1.default.generateUUID();
             if (!_token) {
                 yield _1.default.setUserField(uid, 'rss_token', token);
