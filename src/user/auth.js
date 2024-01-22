@@ -157,18 +157,6 @@ module.exports = function (User) {
             yield database_1.default.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
         });
     }
-    // The next line calls a function in a module that has not been updated to TS yet
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    User.auth.addSession = function (uid, sessionId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!(parseInt(uid, 10) > 0)) {
-                return;
-            }
-            yield cleanExpiredSessions(uid);
-            yield database_1.default.sortedSetAdd(`uid:${uid}:sessions`, Date.now(), sessionId);
-            yield revokeSessionsAboveThreshold(uid, meta_1.default.config.maxUserSessions);
-        });
-    };
     function revokeSessionsAboveThreshold(uid, maxUserSessions) {
         return __awaiter(this, void 0, void 0, function* () {
             // The next line calls a function in a module that has not been updated to TS yet
@@ -193,6 +181,22 @@ module.exports = function (User) {
             }
         });
     }
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.addSession = function (uid, sessionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!(parseInt(uid, 10) > 0)) {
+                return;
+            }
+            yield cleanExpiredSessions(uid);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            yield database_1.default.sortedSetAdd(`uid:${uid}:sessions`, Date.now(), sessionId);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            yield revokeSessionsAboveThreshold(uid, meta_1.default.config.maxUserSessions);
+        });
+    };
     // The next line calls a function in a module that has not been updated to TS yet
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.revokeSession = function (sessionId, uid) {

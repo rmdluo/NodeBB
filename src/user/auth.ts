@@ -151,17 +151,6 @@ export = function (User) {
         await db.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
     }
 
-    // The next line calls a function in a module that has not been updated to TS yet
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    User.auth.addSession = async function (uid, sessionId) {
-        if (!(parseInt(uid, 10) > 0)) {
-            return;
-        }
-        await cleanExpiredSessions(uid);
-        await db.sortedSetAdd(`uid:${uid}:sessions`, Date.now(), sessionId);
-        await revokeSessionsAboveThreshold(uid, meta.config.maxUserSessions);
-    };
-
     async function revokeSessionsAboveThreshold(uid : string, maxUserSessions : number) {
         // The next line calls a function in a module that has not been updated to TS yet
         /* eslint-disable-next-line
@@ -185,6 +174,21 @@ export = function (User) {
             ));
         }
     }
+
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.addSession = async function (uid : string, sessionId : string) {
+        if (!(parseInt(uid, 10) > 0)) {
+            return;
+        }
+        await cleanExpiredSessions(uid);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        await db.sortedSetAdd(`uid:${uid}:sessions`, Date.now(), sessionId);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        await revokeSessionsAboveThreshold(uid, meta.config.maxUserSessions as number);
+    };
 
     // The next line calls a function in a module that has not been updated to TS yet
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
