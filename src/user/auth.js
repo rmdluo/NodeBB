@@ -20,10 +20,13 @@ const meta_1 = __importDefault(require("../meta"));
 const events_1 = __importDefault(require("../events"));
 const batch_1 = __importDefault(require("../batch"));
 const utils_1 = __importDefault(require("../utils"));
-const _1 = __importDefault(require("."));
-module.exports = function () {
-    _1.default.auth = {};
-    _1.default.auth.logAttempt = function (uid, ip) {
+module.exports = function (User) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth = {};
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.logAttempt = function (uid, ip) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
@@ -69,7 +72,9 @@ module.exports = function () {
             throw new Error('[[error:account-locked]]');
         });
     };
-    _1.default.auth.getFeedToken = function (uid) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.getFeedToken = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
@@ -81,17 +86,23 @@ module.exports = function () {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             const token = _token || utils_1.default.generateUUID();
             if (!_token) {
-                yield _1.default.setUserField(uid, 'rss_token', token);
+                // The next lines call a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                yield User.setUserField(uid, 'rss_token', token);
             }
             return token;
         });
     };
-    _1.default.auth.clearLoginAttempts = function (uid) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.clearLoginAttempts = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
             yield database_1.default.delete(`loginAttempts:${uid}`);
         });
     };
-    _1.default.auth.resetLockout = function (uid) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.resetLockout = function (uid) {
         return __awaiter(this, void 0, void 0, function* () {
             yield database_1.default.deleteAll([
                 `loginAttempts:${uid}`,
@@ -101,7 +112,9 @@ module.exports = function () {
     };
     const getSessionFromStore = util_1.default.promisify((sid, callback) => database_1.default.sessionStore.get(sid, (err, sessObj) => callback(err, sessObj || null)));
     const sessionStoreDestroy = util_1.default.promisify((sid, callback) => database_1.default.sessionStore.destroy(sid, err => callback(err)));
-    _1.default.auth.getSessions = function (uid, curSessionId) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.getSessions = function (uid, curSessionId) {
         return __awaiter(this, void 0, void 0, function* () {
             yield cleanExpiredSessions(uid);
             const sids = yield database_1.default.getSortedSetRevRange(`uid:${uid}:sessions`, 0, 19);
@@ -140,7 +153,9 @@ module.exports = function () {
             yield database_1.default.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
         });
     }
-    _1.default.auth.addSession = function (uid, sessionId) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.addSession = function (uid, sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
@@ -155,11 +170,13 @@ module.exports = function () {
             const activeSessions = yield database_1.default.getSortedSetRange(`uid:${uid}:sessions`, 0, -1);
             if (activeSessions.length > maxUserSessions) {
                 const sessionsToRevoke = activeSessions.slice(0, activeSessions.length - maxUserSessions);
-                yield Promise.all(sessionsToRevoke.map(sessionId => _1.default.auth.revokeSession(sessionId, uid)));
+                yield Promise.all(sessionsToRevoke.map(sessionId => User.auth.revokeSession(sessionId, uid)));
             }
         });
     }
-    _1.default.auth.revokeSession = function (sessionId, uid) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.revokeSession = function (sessionId, uid) {
         return __awaiter(this, void 0, void 0, function* () {
             winston_1.default.verbose(`[user.auth] Revoking session ${sessionId} for user ${uid}`);
             const sessionObj = yield getSessionFromStore(sessionId);
@@ -172,7 +189,9 @@ module.exports = function () {
             ]);
         });
     };
-    _1.default.auth.revokeAllSessions = function (uids, except) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.revokeAllSessions = function (uids, except) {
         return __awaiter(this, void 0, void 0, function* () {
             uids = Array.isArray(uids) ? uids : [uids];
             const sids = yield database_1.default.getSortedSetsMembers(uids.map(uid => `uid:${uid}:sessions`));
@@ -180,13 +199,15 @@ module.exports = function () {
             uids.forEach((uid, index) => {
                 const ids = sids[index].filter(id => id !== except);
                 if (ids.length) {
-                    promises.push(ids.map(s => _1.default.auth.revokeSession(s, uid)));
+                    promises.push(ids.map(s => User.auth.revokeSession(s, uid)));
                 }
             });
             yield Promise.all(promises);
         });
     };
-    _1.default.auth.deleteAllSessions = function () {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    User.auth.deleteAllSessions = function () {
         return __awaiter(this, void 0, void 0, function* () {
             yield batch_1.default.processSortedSet('users:joindate', (uids) => __awaiter(this, void 0, void 0, function* () {
                 const sessionKeys = uids.map(uid => `uid:${uid}:sessions`);

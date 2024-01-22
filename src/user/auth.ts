@@ -7,11 +7,14 @@ import meta from '../meta';
 import events from '../events';
 import batch from '../batch';
 import utils from '../utils';
-import User from '.';
 
-export = function () {
+export = function (User) {
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth = {};
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.logAttempt = async function (uid : string, ip : string) {
         if (!(parseInt(uid, 10) > 0)) {
             return;
@@ -62,6 +65,8 @@ export = function () {
         throw new Error('[[error:account-locked]]');
     };
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.getFeedToken = async function (uid : string) {
         if (!(parseInt(uid, 10) > 0)) {
             return;
@@ -74,15 +79,21 @@ export = function () {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const token : string = _token || (utils.generateUUID() as string);
         if (!_token) {
+            // The next lines call a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             await User.setUserField(uid, 'rss_token', token);
         }
         return token;
     };
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.clearLoginAttempts = async function (uid) {
         await db.delete(`loginAttempts:${uid}`);
     };
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.resetLockout = async function (uid) {
         await db.deleteAll([
             `loginAttempts:${uid}`,
@@ -97,6 +108,8 @@ export = function () {
         (sid, callback) => db.sessionStore.destroy(sid, err => callback(err))
     );
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.getSessions = async function (uid, curSessionId) {
         await cleanExpiredSessions(uid);
         const sids = await db.getSortedSetRevRange(`uid:${uid}:sessions`, 0, 19);
@@ -134,6 +147,8 @@ export = function () {
         await db.sortedSetRemove(`uid:${uid}:sessions`, expiredSids);
     }
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.addSession = async function (uid, sessionId) {
         if (!(parseInt(uid, 10) > 0)) {
             return;
@@ -151,6 +166,8 @@ export = function () {
         }
     }
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.revokeSession = async function (sessionId, uid) {
         winston.verbose(`[user.auth] Revoking session ${sessionId} for user ${uid}`);
         const sessionObj : any = await getSessionFromStore(sessionId);
@@ -163,6 +180,8 @@ export = function () {
         ]);
     };
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.revokeAllSessions = async function (uids, except) {
         uids = Array.isArray(uids) ? uids : [uids];
         const sids = await db.getSortedSetsMembers(uids.map(uid => `uid:${uid}:sessions`));
@@ -176,6 +195,8 @@ export = function () {
         await Promise.all(promises);
     };
 
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     User.auth.deleteAllSessions = async function () {
         await batch.processSortedSet('users:joindate', async (uids) => {
             const sessionKeys = uids.map(uid => `uid:${uid}:sessions`);
