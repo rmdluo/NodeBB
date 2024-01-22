@@ -28,18 +28,38 @@ module.exports = function () {
             if (!(parseInt(uid, 10) > 0)) {
                 return;
             }
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const exists = yield database_1.default.exists(`lockout:${uid}`);
             if (exists) {
                 throw new Error('[[error:account-locked]]');
             }
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const attempts = yield database_1.default.increment(`loginAttempts:${uid}`);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (attempts <= meta_1.default.config.loginAttempts) {
+                // The next line calls a function in a module that has not been updated to TS yet
+                /* eslint-disable-next-line
+                    @typescript-eslint/no-unsafe-member-access,
+                    @typescript-eslint/no-unsafe-call,
+                    @typescript-eslint/no-unsafe-return
+                */
                 return yield database_1.default.pexpire(`loginAttempts:${uid}`, 1000 * 60 * 60);
             }
             // Lock out the account
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             yield database_1.default.set(`lockout:${uid}`, '');
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             const duration = 1000 * 60 * meta_1.default.config.lockoutDuration;
+            // The next lines call a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             yield database_1.default.delete(`loginAttempts:${uid}`);
+            // The next lines call a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             yield database_1.default.pexpire(`lockout:${uid}`, duration);
             yield events_1.default.log({
                 type: 'account-locked',

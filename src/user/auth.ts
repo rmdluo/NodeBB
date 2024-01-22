@@ -12,23 +12,47 @@ import User from '.';
 export = function () {
     User.auth = {};
 
-    User.auth.logAttempt = async function (uid, ip) {
+    User.auth.logAttempt = async function (uid : string, ip : string) {
         if (!(parseInt(uid, 10) > 0)) {
             return;
         }
-        const exists = await db.exists(`lockout:${uid}`);
+
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const exists : boolean = await db.exists(`lockout:${uid}`) as boolean;
         if (exists) {
             throw new Error('[[error:account-locked]]');
         }
-        const attempts = await db.increment(`loginAttempts:${uid}`);
-        if (attempts <= meta.config.loginAttempts) {
+
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const attempts : number = await db.increment(`loginAttempts:${uid}`) as number;
+
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (attempts <= (meta.config.loginAttempts as number)) {
+            // The next line calls a function in a module that has not been updated to TS yet
+            /* eslint-disable-next-line
+                @typescript-eslint/no-unsafe-member-access,
+                @typescript-eslint/no-unsafe-call,
+                @typescript-eslint/no-unsafe-return
+            */
             return await db.pexpire(`loginAttempts:${uid}`, 1000 * 60 * 60);
         }
         // Lock out the account
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.set(`lockout:${uid}`, '');
-        const duration = 1000 * 60 * meta.config.lockoutDuration;
 
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const duration : number = 1000 * 60 * (meta.config.lockoutDuration as number);
+
+        // The next lines call a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.delete(`loginAttempts:${uid}`);
+        // The next lines call a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.pexpire(`lockout:${uid}`, duration);
         await events.log({
             type: 'account-locked',
