@@ -1,13 +1,45 @@
+import * as db from '../database';
+import * as notifications from '../notifications';
+import * as privileges from '../privileges';
+import * as plugins from '../plugins';
+import * as utils from '../utils';
 
-'use strict';
+type Method = (tid: string, uid : string) => Promise<void>;
+type Set = any;
 
-const db = require('../database');
-const notifications = require('../notifications');
-const privileges = require('../privileges');
-const plugins = require('../plugins');
-const utils = require('../utils');
+interface FollowData {
+    following : boolean;
+    ignoring : boolean;
+}
 
-module.exports = function (Topics) {
+interface PostData {
+    pid: string;
+    topic: {tid : string, title: string};
+    content: string;
+}
+
+interface NotifData {
+
+}
+
+interface Topics {
+    exists: (tid : string) => Promise<boolean>;
+    toggleFollow: (tid : string, uid : string) => Promise<boolean>;
+    follow: (tid : string, uid : string) => Promise<void>;
+    unfollow: (tid : string, uid : string) => Promise<void>;
+    ignore: (tid : string, uid : string) => Promise<void>;
+    isFollowing: (tids : string[], uid : string) => Promise<boolean>;
+    isIgnoring: (tids : string[], uid : string) => Promise<boolean>;
+    getFollowData: (tids : string[], uid : string) => Promise<FollowData[]>
+    getFollowers: (tid : string) => Promise<string[]>;
+    getIgnorers: (tid : string) => Promise<string[]>;
+    filterIgnoringUids: (tid : string, uids : string[]) => Promise<string[]>;
+    filterWatchedTids: (tids : string[], uid : string) => Promise<string[]>;
+    filterNotIgnoredTids: (tids : string[], uid : string) => Promise<string[]>;
+    notifyFollowers: (postData : PostData, exceptUid : string, notifData : NotifData) => Promise<void>;
+}
+
+export = function (Topics : Topics) {
     Topics.toggleFollow = async function (tid, uid) {
         const exists = await Topics.exists(tid);
         if (!exists) {
@@ -34,7 +66,7 @@ module.exports = function (Topics) {
         await setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
     };
 
-    async function setWatching(method1, method2, hook, tid, uid) {
+    async function setWatching(method1 : Method, method2 : Method, hook : string, tid : string, uid : string) {
         if (!(parseInt(uid, 10) > 0)) {
             throw new Error('[[error:not-logged-in]]');
         }
@@ -47,28 +79,28 @@ module.exports = function (Topics) {
         plugins.hooks.fire(hook, { uid: uid, tid: tid });
     }
 
-    async function follow(tid, uid) {
+    async function follow(tid : string, uid : string) {
         await addToSets(`tid:${tid}:followers`, `uid:${uid}:followed_tids`, tid, uid);
     }
 
-    async function unfollow(tid, uid) {
+    async function unfollow(tid : string, uid : string) {
         await removeFromSets(`tid:${tid}:followers`, `uid:${uid}:followed_tids`, tid, uid);
     }
 
-    async function ignore(tid, uid) {
+    async function ignore(tid : string, uid : string) {
         await addToSets(`tid:${tid}:ignorers`, `uid:${uid}:ignored_tids`, tid, uid);
     }
 
-    async function unignore(tid, uid) {
+    async function unignore(tid : string, uid : string) {
         await removeFromSets(`tid:${tid}:ignorers`, `uid:${uid}:ignored_tids`, tid, uid);
     }
 
-    async function addToSets(set1, set2, tid, uid) {
-        await db.setAdd(set1, uid);
-        await db.sortedSetAdd(set2, Date.now(), tid);
+    async function addToSets(set1 : Set, set2 : Set, tid : string, uid : string) {
+        await db.setAdd(set1, uid) as void;
+        await db.sortedSetAdd(set2, Date.now(), tid) as void;
     }
 
-    async function removeFromSets(set1, set2, tid, uid) {
+    async function removeFromSets(set1 : Set, set2 : Set, tid : string, uid : string) {
         await db.setRemove(set1, uid);
         await db.sortedSetRemove(set2, tid);
     }
@@ -103,7 +135,7 @@ module.exports = function (Topics) {
         return followData;
     };
 
-    async function isIgnoringOrFollowing(set, tids, uid) {
+    async function isIgnoringOrFollowing(set : Set, tids : string[], uid : string) {
         if (!Array.isArray(tids)) {
             return;
         }
