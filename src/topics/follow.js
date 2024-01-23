@@ -156,6 +156,8 @@ module.exports = function (Topics) {
             }
             const keys = [];
             tids.forEach(tid => keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`));
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const data = yield db.isMemberOfSets(keys, uid);
             const followData = [];
             for (let i = 0; i < data.length; i += 2) {

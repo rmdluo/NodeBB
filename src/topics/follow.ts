@@ -148,9 +148,11 @@ export = function (Topics : Topics) {
         const keys = [];
         tids.forEach(tid => keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`));
 
-        const data = await db.isMemberOfSets(keys, uid);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const data : boolean[] = await db.isMemberOfSets(keys, uid) as boolean[];
 
-        const followData = [];
+        const followData : FollowData[] = [];
         for (let i = 0; i < data.length; i += 2) {
             followData.push({
                 following: data[i],
