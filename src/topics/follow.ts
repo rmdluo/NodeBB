@@ -175,7 +175,9 @@ export = function (Topics : Topics) {
     };
 
     Topics.filterIgnoringUids = async function (tid, uids) {
-        const isIgnoring = await db.isSetMembers(`tid:${tid}:ignorers`, uids);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const isIgnoring : boolean[] = await db.isSetMembers(`tid:${tid}:ignorers`, uids) as boolean[];
         const readingUids = uids.filter((uid, index) => uid && !isIgnoring[index]);
         return readingUids;
     };
@@ -184,7 +186,9 @@ export = function (Topics : Topics) {
         if (parseInt(uid, 10) <= 0) {
             return [];
         }
-        const scores = await db.sortedSetScores(`uid:${uid}:followed_tids`, tids);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const scores : string[] = await db.sortedSetScores(`uid:${uid}:followed_tids`, tids) as string[];
         return tids.filter((tid, index) => tid && !!scores[index]);
     };
 
