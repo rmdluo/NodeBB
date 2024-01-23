@@ -163,11 +163,15 @@ export = function (Topics : Topics) {
     };
 
     Topics.getFollowers = async function (tid) {
-        return await db.getSetMembers(`tid:${tid}:followers`);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        return await db.getSetMembers(`tid:${tid}:followers`) as Promise<string[]>;
     };
 
     Topics.getIgnorers = async function (tid) {
-        return await db.getSetMembers(`tid:${tid}:ignorers`);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        return await db.getSetMembers(`tid:${tid}:ignorers`) as Promise<string[]>;
     };
 
     Topics.filterIgnoringUids = async function (tid, uids) {

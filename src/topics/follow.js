@@ -171,11 +171,15 @@ module.exports = function (Topics) {
     };
     Topics.getFollowers = function (tid) {
         return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             return yield db.getSetMembers(`tid:${tid}:followers`);
         });
     };
     Topics.getIgnorers = function (tid) {
         return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             return yield db.getSetMembers(`tid:${tid}:ignorers`);
         });
     };
