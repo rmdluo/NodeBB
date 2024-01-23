@@ -18,8 +18,11 @@ interface PostData {
     content: string;
 }
 
-interface NotifData {
-
+type NotifData = {
+    type: string;
+    bodyShort: string;
+    nid: string;
+    mergeId: string;
 }
 
 interface Topics {
