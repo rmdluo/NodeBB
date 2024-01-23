@@ -122,6 +122,20 @@ module.exports = function (Topics) {
             yield setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
         });
     };
+    function isIgnoringOrFollowing(set, tids, uid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(tids)) {
+                return;
+            }
+            if (parseInt(uid, 10) <= 0) {
+                return tids.map(() => false);
+            }
+            const keys = tids.map(tid => `tid:${tid}:${set}`);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            return yield db.isMemberOfSets(keys, uid);
+        });
+    }
     Topics.isFollowing = function (tids, uid) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield isIgnoringOrFollowing('followers', tids, uid);
@@ -153,18 +167,6 @@ module.exports = function (Topics) {
             return followData;
         });
     };
-    function isIgnoringOrFollowing(set, tids, uid) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(tids)) {
-                return;
-            }
-            if (parseInt(uid, 10) <= 0) {
-                return tids.map(() => false);
-            }
-            const keys = tids.map(tid => `tid:${tid}:${set}`);
-            return yield db.isMemberOfSets(keys, uid);
-        });
-    }
     Topics.getFollowers = function (tid) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield db.getSetMembers(`tid:${tid}:followers`);

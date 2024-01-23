@@ -5,7 +5,7 @@ import * as plugins from '../plugins';
 import * as utils from '../utils';
 
 type Method = (tid: string, uid : string) => Promise<void>;
-type Set = any;
+type Set = string;
 
 interface FollowData {
     following : boolean;
@@ -31,8 +31,8 @@ interface Topics {
     follow: (tid : string, uid : string) => Promise<void>;
     unfollow: (tid : string, uid : string) => Promise<void>;
     ignore: (tid : string, uid : string) => Promise<void>;
-    isFollowing: (tids : string[], uid : string) => Promise<boolean>;
-    isIgnoring: (tids : string[], uid : string) => Promise<boolean>;
+    isFollowing: (tids : string[], uid : string) => Promise<boolean[]>;
+    isIgnoring: (tids : string[], uid : string) => Promise<boolean[]>;
     getFollowData: (tids : string[], uid : string) => Promise<FollowData[]>
     getFollowers: (tid : string) => Promise<string[]>;
     getIgnorers: (tid : string) => Promise<string[]>;
@@ -117,6 +117,19 @@ export = function (Topics : Topics) {
         await setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
     };
 
+    async function isIgnoringOrFollowing(set : Set, tids : string[], uid : string) : Promise<boolean[]> {
+        if (!Array.isArray(tids)) {
+            return;
+        }
+        if (parseInt(uid, 10) <= 0) {
+            return tids.map(() => false);
+        }
+        const keys = tids.map(tid => `tid:${tid}:${set}`);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        return await db.isMemberOfSets(keys, uid) as Promise<boolean[]>;
+    }
+
     Topics.isFollowing = async function (tids, uid) {
         return await isIgnoringOrFollowing('followers', tids, uid);
     };
@@ -146,17 +159,6 @@ export = function (Topics : Topics) {
         }
         return followData;
     };
-
-    async function isIgnoringOrFollowing(set : Set, tids : string[], uid : string) {
-        if (!Array.isArray(tids)) {
-            return;
-        }
-        if (parseInt(uid, 10) <= 0) {
-            return tids.map(() => false);
-        }
-        const keys = tids.map(tid => `tid:${tid}:${set}`);
-        return await db.isMemberOfSets(keys, uid);
-    }
 
     Topics.getFollowers = async function (tid) {
         return await db.getSetMembers(`tid:${tid}:followers`);
