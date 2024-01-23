@@ -57,18 +57,6 @@ export = function (Topics : Topics) {
         return !isFollowing[0];
     };
 
-    Topics.follow = async function (tid, uid) {
-        await setWatching(follow, unignore, 'action:topic.follow', tid, uid);
-    };
-
-    Topics.unfollow = async function (tid, uid) {
-        await setWatching(unfollow, unignore, 'action:topic.unfollow', tid, uid);
-    };
-
-    Topics.ignore = async function (tid, uid) {
-        await setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
-    };
-
     async function setWatching(method1 : Method, method2 : Method, hook : string, tid : string, uid : string) {
         if (!(parseInt(uid, 10) > 0)) {
             throw new Error('[[error:not-logged-in]]');
@@ -79,7 +67,26 @@ export = function (Topics : Topics) {
         }
         await method1(tid, uid);
         await method2(tid, uid);
-        plugins.hooks.fire(hook, { uid: uid, tid: tid });
+        plugins.hooks.fire(hook, { uid: uid, tid: tid }) as void;
+    }
+
+    async function addToSets(set1 : Set, set2 : Set, tid : string, uid : string) {
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        await db.setAdd(set1, uid) as void;
+
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        await db.sortedSetAdd(set2, Date.now(), tid) as void;
+    }
+
+    async function removeFromSets(set1 : Set, set2 : Set, tid : string, uid : string) {
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        await db.setRemove(set1, uid);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        await db.sortedSetRemove(set2, tid);
     }
 
     async function follow(tid : string, uid : string) {
@@ -98,15 +105,17 @@ export = function (Topics : Topics) {
         await removeFromSets(`tid:${tid}:ignorers`, `uid:${uid}:ignored_tids`, tid, uid);
     }
 
-    async function addToSets(set1 : Set, set2 : Set, tid : string, uid : string) {
-        await db.setAdd(set1, uid) as void;
-        await db.sortedSetAdd(set2, Date.now(), tid) as void;
-    }
+    Topics.follow = async function (tid, uid) {
+        await setWatching(follow, unignore, 'action:topic.follow', tid, uid);
+    };
 
-    async function removeFromSets(set1 : Set, set2 : Set, tid : string, uid : string) {
-        await db.setRemove(set1, uid);
-        await db.sortedSetRemove(set2, tid);
-    }
+    Topics.unfollow = async function (tid, uid) {
+        await setWatching(unfollow, unignore, 'action:topic.unfollow', tid, uid);
+    };
+
+    Topics.ignore = async function (tid, uid) {
+        await setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
+    };
 
     Topics.isFollowing = async function (tids, uid) {
         return await isIgnoringOrFollowing('followers', tids, uid);

@@ -53,21 +53,6 @@ module.exports = function (Topics) {
             return !isFollowing[0];
         });
     };
-    Topics.follow = function (tid, uid) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield setWatching(follow, unignore, 'action:topic.follow', tid, uid);
-        });
-    };
-    Topics.unfollow = function (tid, uid) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield setWatching(unfollow, unignore, 'action:topic.unfollow', tid, uid);
-        });
-    };
-    Topics.ignore = function (tid, uid) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
-        });
-    };
     function setWatching(method1, method2, hook, tid, uid) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(parseInt(uid, 10) > 0)) {
@@ -80,6 +65,26 @@ module.exports = function (Topics) {
             yield method1(tid, uid);
             yield method2(tid, uid);
             plugins.hooks.fire(hook, { uid: uid, tid: tid });
+        });
+    }
+    function addToSets(set1, set2, tid, uid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            yield db.setAdd(set1, uid);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            yield db.sortedSetAdd(set2, Date.now(), tid);
+        });
+    }
+    function removeFromSets(set1, set2, tid, uid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            yield db.setRemove(set1, uid);
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            yield db.sortedSetRemove(set2, tid);
         });
     }
     function follow(tid, uid) {
@@ -102,18 +107,21 @@ module.exports = function (Topics) {
             yield removeFromSets(`tid:${tid}:ignorers`, `uid:${uid}:ignored_tids`, tid, uid);
         });
     }
-    function addToSets(set1, set2, tid, uid) {
+    Topics.follow = function (tid, uid) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield db.setAdd(set1, uid);
-            yield db.sortedSetAdd(set2, Date.now(), tid);
+            yield setWatching(follow, unignore, 'action:topic.follow', tid, uid);
         });
-    }
-    function removeFromSets(set1, set2, tid, uid) {
+    };
+    Topics.unfollow = function (tid, uid) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield db.setRemove(set1, uid);
-            yield db.sortedSetRemove(set2, tid);
+            yield setWatching(unfollow, unignore, 'action:topic.unfollow', tid, uid);
         });
-    }
+    };
+    Topics.ignore = function (tid, uid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
+        });
+    };
     Topics.isFollowing = function (tids, uid) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield isIgnoringOrFollowing('followers', tids, uid);
