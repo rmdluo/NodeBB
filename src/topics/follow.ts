@@ -1,8 +1,8 @@
-import * as db from '../database';
-import * as notifications from '../notifications';
-import * as privileges from '../privileges';
-import * as plugins from '../plugins';
-import * as utils from '../utils';
+import db from '../database';
+import notifications from '../notifications';
+import privileges from '../privileges';
+import plugins from '../plugins';
+import utils from '../utils';
 
 type Method = (tid: string, uid : string) => Promise<void>;
 type Set = string;
@@ -33,7 +33,7 @@ interface Topics {
     ignore: (tid : string, uid : string) => Promise<void>;
     isFollowing: (tids : string[], uid : string) => Promise<boolean[]>;
     isIgnoring: (tids : string[], uid : string) => Promise<boolean[]>;
-    getFollowData: (tids : string[], uid : string) => Promise<FollowData[]>
+    getFollowData: (tids : string[], uid : string) => Promise<FollowData[]>;
     getFollowers: (tid : string) => Promise<string[]>;
     getIgnorers: (tid : string) => Promise<string[]>;
     filterIgnoringUids: (tid : string, uids : string[]) => Promise<string[]>;
@@ -119,7 +119,7 @@ export = function (Topics : Topics) {
 
     async function isIgnoringOrFollowing(set : Set, tids : string[], uid : string) : Promise<boolean[]> {
         if (!Array.isArray(tids)) {
-            return;
+            return [];
         }
         if (parseInt(uid, 10) <= 0) {
             return tids.map(() => false);
@@ -140,12 +140,12 @@ export = function (Topics : Topics) {
 
     Topics.getFollowData = async function (tids, uid) {
         if (!Array.isArray(tids)) {
-            return;
+            return [];
         }
         if (parseInt(uid, 10) <= 0) {
             return tids.map(() => ({ following: false, ignoring: false }));
         }
-        const keys = [];
+        const keys : string[] = [];
         tids.forEach(tid => keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`));
 
         // The next line calls a function in a module that has not been updated to TS yet
@@ -210,7 +210,7 @@ export = function (Topics : Topics) {
             followers.splice(index, 1);
         }
 
-        followers = await privileges.topics.filterUids('topics:read', postData.topic.tid, followers);
+        followers = await privileges.topics.filterUids('topics:read', postData.topic.tid, followers) as string[];
         if (!followers.length) {
             return;
         }
@@ -220,7 +220,7 @@ export = function (Topics : Topics) {
             title = utils.decodeHTMLEntities(title);
         }
 
-        const notification = await notifications.create({
+        const notification : object = await notifications.create({
             subject: title,
             bodyLong: postData.content,
             pid: postData.pid,
@@ -229,7 +229,7 @@ export = function (Topics : Topics) {
             from: exceptUid,
             topicTitle: title,
             ...notifData,
-        });
-        notifications.push(notification, followers);
+        }) as object;
+        notifications.push(notification, followers) as void;
     };
 };
