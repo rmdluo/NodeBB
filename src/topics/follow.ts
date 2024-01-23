@@ -196,7 +196,9 @@ export = function (Topics : Topics) {
         if (parseInt(uid, 10) <= 0) {
             return tids;
         }
-        const scores = await db.sortedSetScores(`uid:${uid}:ignored_tids`, tids);
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const scores : string[] = await db.sortedSetScores(`uid:${uid}:ignored_tids`, tids) as string[];
         return tids.filter((tid, index) => tid && !scores[index]);
     };
 
