@@ -19,10 +19,10 @@ interface PostData {
 }
 
 type NotifData = {
-    type: string;
-    bodyShort: string;
-    nid: string;
-    mergeId: string;
+    type?: string;
+    bodyShort?: string;
+    nid?: string;
+    mergeId?: string;
 }
 
 interface Topics {
