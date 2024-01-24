@@ -38,13 +38,19 @@ module.exports = function (Topics) {
             if (!(parseInt(uid, 10) > 0)) {
                 throw new Error('[[error:not-logged-in]]');
             }
+            console.log("-1");
             const exists = yield Topics.exists(tid);
             if (!exists) {
                 throw new Error('[[error:no-topic]]');
             }
+            console.log("0");
             yield method1(tid, uid);
+            console.log("1");
             yield method2(tid, uid);
+            console.log("2");
+            // plugins.hooks.fire('action:topic.follow', {})
             plugins_1.default.hooks.fire(hook, { uid: uid, tid: tid });
+            console.log("3");
         });
     }
     function addToSets(set1, set2, tid, uid) {

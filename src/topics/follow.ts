@@ -73,11 +73,11 @@ export = function (Topics : Topics) {
     async function addToSets(set1 : Set, set2 : Set, tid : string, uid : string) {
         // The next line calls a function in a module that has not been updated to TS yet
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        await db.setAdd(set1, uid) as void;
+        await db.setAdd(set1, uid);
 
         // The next line calls a function in a module that has not been updated to TS yet
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        await db.sortedSetAdd(set2, Date.now(), tid) as void;
+        await db.sortedSetAdd(set2, Date.now(), tid);
     }
 
     async function removeFromSets(set1 : Set, set2 : Set, tid : string, uid : string) {
